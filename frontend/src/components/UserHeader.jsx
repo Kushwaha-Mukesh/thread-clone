@@ -79,6 +79,27 @@ const UserHeader = () => {
           </Box>
         </Flex>
       </Flex>
+      <Flex w={"full"}>
+        <Flex
+          flex={1}
+          justifyContent={"center"}
+          borderBottom={"1.5px solid white"}
+          pb={3}
+          cursor={"pointer"}
+        >
+          <Text fontWeight={"bold"}>Threads</Text>
+        </Flex>
+        <Flex
+          flex={1}
+          justifyContent={"center"}
+          borderBottom={"1.5px solid gray"}
+          color={"gray.light"}
+          pb={3}
+          cursor={"pointer"}
+        >
+          <Text fontWeight={"bold"}>Replies</Text>
+        </Flex>
+      </Flex>
     </VStack>
   );
 };
