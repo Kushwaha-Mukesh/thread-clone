@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { Avatar, Box, Flex, Image, Text } from "@chakra-ui/react";
 import { BsThreeDots } from "react-icons/bs";
-const UserPost = () => {
+import Actions from "./Actions";
+import { useState } from "react";
+const UserPost = ({ likes, replies, postImage }) => {
+  const [liked, setLiked] = useState(false);
   return (
     <Link to={"/mark/post/1"}>
       <Flex gap={3} mb={4} py={5}>
@@ -14,8 +17,8 @@ const UserPost = () => {
               name="mukesh"
               src="https://bit.ly/dan-abramov"
               position={"absolute"}
-              top={0}
-              left={"15px"}
+              top={"-12px"}
+              left={"12px"}
               padding={2}
             />
             <Avatar
@@ -33,7 +36,7 @@ const UserPost = () => {
               src="https://bit.ly/prosper-baba"
               position={"absolute"}
               bottom={0}
-              left={"4px"}
+              left={"6px"}
               padding={2}
             />
           </Box>
@@ -60,8 +63,18 @@ const UserPost = () => {
             border={"1px solid"}
             borderColor={"gray.light"}
           >
-            <Image src="/post1.png" w={"full"} />
+            <Image src={postImage} w={"full"} />
           </Box>
+          <Actions liked={liked} setLiked={setLiked} />
+          <Flex gap={2} alignItems={"center"}>
+            <Text color={"gray.light"} fontSize={"sm"}>
+              {replies} Replies
+            </Text>
+            <Box w={1} h={1} borderRadius={"full"} bg={"gray.light"}></Box>
+            <Text color={"gray.light"} fontSize={"sm"}>
+              {likes} Likes
+            </Text>
+          </Flex>
         </Flex>
       </Flex>
     </Link>
