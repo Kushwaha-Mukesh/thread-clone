@@ -87,3 +87,41 @@ export const signOut = (req, res) => {
     console.log("Error in logOut: " + error.message);
   }
 };
+
+export const followUnfollow = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid Request!" });
+    }
+    const { _id } = req.user;
+    if (id === _id.toString()) {
+      return res
+        .status(401)
+        .json({ success: false, message: "You cannot follow yourself!" });
+    }
+    const userToFollow = await User.findById(id);
+    const currentUser = await User.findById(_id);
+    if (
+      userToFollow.followers.includes(_id) ||
+      currentUser.following.includes(id)
+    ) {
+      await User.findByIdAndUpdate(id, { $pull: { followers: _id } });
+      await User.findByIdAndUpdate(_id, { $pull: { following: id } });
+      res
+        .status(200)
+        .json({ success: true, message: "User Unfollowed Success!" });
+    } else {
+      await User.findByIdAndUpdate(id, { $push: { followers: _id } });
+      await User.findByIdAndUpdate(_id, { $push: { following: id } });
+      res
+        .status(200)
+        .json({ success: true, message: "User Followed Success!" });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal server error." });
+    console.log("Error: " + error.message);
+  }
+};
