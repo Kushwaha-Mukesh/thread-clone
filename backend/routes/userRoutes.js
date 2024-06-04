@@ -4,6 +4,8 @@ import {
   signUp,
   signOut,
   followUnfollow,
+  updateProfile,
+  getProfile,
 } from "../controllers/user.js";
 import isLoggedIn from "../middleware/verifyUser.js";
 
@@ -13,5 +15,7 @@ router.post("/signup", signUp);
 router.post("/signin", signIn);
 router.get("/signout", signOut);
 router.get("/follow/:id", isLoggedIn, followUnfollow);
+router.post("/update/:id", isLoggedIn, updateProfile);
+router.get("/profile/:id", getProfile);
 
 export default router;

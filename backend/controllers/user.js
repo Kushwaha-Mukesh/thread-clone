@@ -125,3 +125,50 @@ export const followUnfollow = async (req, res) => {
     console.log("Error: " + error.message);
   }
 };
+
+export const getProfile = async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid Request!" });
+  }
+  try {
+    const user = await User.findById(id);
+    user.password = undefined;
+    res.status(200).json({ successs: true, message: user });
+  } catch (error) {
+    console.log(error.message);
+    res
+      .status(500)
+      .json({ success: false, message: "Error getting user profile" });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid Request!" });
+  }
+  if (req.user._id.toString() !== id) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid Request!" });
+  }
+  if (req.body.password) {
+    const hashPassword = await bcryptjs.hash(req.body.password, 10);
+    req.body.password = hashPassword;
+  }
+  try {
+    const user = await User.findByIdAndUpdate(id, req.body, { new: true });
+    user.password = undefined;
+    res.status(200).json({ success: true, message: user });
+  } catch (error) {
+    console.log(error.message);
+    res
+      .status(500)
+      .json({ success: false, message: "Error updating user profile" });
+  }
+};
