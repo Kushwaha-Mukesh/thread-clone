@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -15,5 +16,6 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/post", postRoutes);
 
 export default app;

@@ -127,15 +127,23 @@ export const followUnfollow = async (req, res) => {
 };
 
 export const getProfile = async (req, res) => {
-  const { id } = req.params;
-  if (!id) {
+  const { username } = req.params;
+  if (!username) {
     return res
       .status(400)
       .json({ success: false, message: "Invalid Request!" });
   }
   try {
-    const user = await User.findById(id);
-    user.password = undefined;
+    const user = await User.findOne({ username })
+      .select("-password")
+      .select("-updatedAt");
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found!" });
+    }
+
     res.status(200).json({ successs: true, message: user });
   } catch (error) {
     console.log(error.message);
