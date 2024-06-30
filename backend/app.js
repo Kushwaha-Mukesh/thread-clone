@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
   res.send("Welcome to backend of thread app!");
 });
 
-app.use("/api/v1/user", userRoutes);
-app.use("/api/v1/post", postRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/post", postRoutes);
 
 export default app;

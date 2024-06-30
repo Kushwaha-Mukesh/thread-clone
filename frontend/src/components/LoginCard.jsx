@@ -18,10 +18,36 @@ import { useState } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useSetRecoilState } from "recoil";
 import authScreenAtom from "../atoms/authAtom";
+import userAtom from "../atoms/userAtom";
+import useShowToast from "../hooks/useShowToast";
+import axios from "axios";
 
 const LoginCard = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [loginDetails, setLoginDetails] = useState({
+    username: "",
+    password: "",
+  });
+
   const setAuthScreen = useSetRecoilState(authScreenAtom);
+  const setUser = useSetRecoilState(userAtom);
+  const showToast = useShowToast();
+
+  const handleLogin = async () => {
+    try {
+      const res = await axios.post("/api/user/signin", loginDetails);
+      if (res.data.success) {
+        localStorage.setItem("thread-user", JSON.stringify(res.data));
+        setUser(res.data);
+        showToast("Success", res.data.message, "success");
+      } else {
+        showToast("Error", res.data.message, "error");
+      }
+    } catch (error) {
+      showToast("Error", error.response.data.message, "error");
+    }
+  };
+
   return (
     <Flex align={"center"} justify={"center"}>
       <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
@@ -40,12 +66,27 @@ const LoginCard = () => {
           <Stack spacing={4}>
             <FormControl id="username" isRequired>
               <FormLabel>Username</FormLabel>
-              <Input type="text" />
+              <Input
+                type="text"
+                onChange={(e) =>
+                  setLoginDetails({ ...loginDetails, username: e.target.value })
+                }
+                value={loginDetails.username}
+              />
             </FormControl>
             <FormControl id="password" isRequired>
               <FormLabel>Password</FormLabel>
               <InputGroup>
-                <Input type={showPassword ? "text" : "password"} />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  onChange={(e) =>
+                    setLoginDetails({
+                      ...loginDetails,
+                      password: e.target.value,
+                    })
+                  }
+                  value={loginDetails.password}
+                />
                 <InputRightElement h={"full"}>
                   <Button
                     variant={"ghost"}
@@ -67,6 +108,7 @@ const LoginCard = () => {
                 _hover={{
                   bg: useColorModeValue("gray.700", "gray.800"),
                 }}
+                onClick={handleLogin}
               >
                 Log In
               </Button>
