@@ -1,6 +1,7 @@
 import User from "../models/userModel.js";
 import bcryptjs from "bcryptjs";
 import generateTokenAndCookie from "../utils/generateTokenAndCookie.js";
+import { v2 as cloudinary } from "cloudinary";
 
 export const signUp = async (req, res) => {
   const { username, name, email, password } = req.body;
@@ -25,13 +26,12 @@ export const signUp = async (req, res) => {
     });
     await newUser.save();
     generateTokenAndCookie(newUser._id, res);
+    newUser.password = undefined;
+
     res.status(200).json({
       success: true,
       message: "User Registered Successfully!",
-      id: newUser._id,
-      username: newUser.username,
-      email: newUser.email,
-      name: newUser.name,
+      user: newUser,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error." });
@@ -60,13 +60,11 @@ export const signIn = async (req, res) => {
         .json({ success: false, message: "Invalid Credentials!" });
     }
     generateTokenAndCookie(user._id, res);
+    user.password = undefined;
     res.status(200).json({
       success: true,
       message: "Sign In Successfully!",
-      id: user._id,
-      username: user.username,
-      email: user.email,
-      name: user.name,
+      user,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal server error." });
@@ -165,14 +163,36 @@ export const updateProfile = async (req, res) => {
       .status(400)
       .json({ success: false, message: "Invalid Request!" });
   }
-  if (req.body.password) {
-    const hashPassword = await bcryptjs.hash(req.body.password, 10);
-    req.body.password = hashPassword;
+
+  try {
+    const user = await User.findById(id);
+    if (req.body.password) {
+      const hashPassword = await bcryptjs.hash(req.body.password, 10);
+      req.body.password = hashPassword;
+    }
+
+    if (req.body.profilePicture) {
+      if (user.profilePicture) {
+        await cloudinary.uploader.destroy(
+          user.profilePicture.split("/").pop().split(".")[0]
+        );
+      }
+      const uploadedResponse = await cloudinary.uploader.upload(
+        req.body.profilePicture
+      );
+      req.body.profilePicture = uploadedResponse.secure_url;
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res
+      .status(500)
+      .json({ success: false, message: "Error updating user profile" });
   }
+
   try {
     const user = await User.findByIdAndUpdate(id, req.body, { new: true });
     user.password = undefined;
-    res.status(200).json({ success: true, message: user });
+    res.status(200).json({ success: true, message: "Update Success", user });
   } catch (error) {
     console.log(error.message);
     res
