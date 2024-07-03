@@ -171,15 +171,16 @@ export const updateProfile = async (req, res) => {
       req.body.password = hashPassword;
     }
 
-    if (req.body.profilePicture) {
+    if (req.files && req.files.profilePicture) {
       if (user.profilePicture) {
         await cloudinary.uploader.destroy(
           user.profilePicture.split("/").pop().split(".")[0]
         );
       }
       const uploadedResponse = await cloudinary.uploader.upload(
-        req.body.profilePicture
+        req.files.profilePicture.tempFilePath
       );
+      console.log(uploadedResponse);
       req.body.profilePicture = uploadedResponse.secure_url;
     }
   } catch (error) {

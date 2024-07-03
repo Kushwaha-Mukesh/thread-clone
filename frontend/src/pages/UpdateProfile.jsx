@@ -21,7 +21,7 @@ const UpdateProfile = () => {
   const [user, setUser] = useRecoilState(userAtom);
 
   const fileRef = useRef();
-  const { handleImageChange, imageUrl } = usePreviewImg();
+  const { handleImageChange, imageUrl, imageFile } = usePreviewImg();
   const showToast = useShowToast();
 
   const [updateDetails, setUpdateDetails] = useState({
@@ -29,16 +29,19 @@ const UpdateProfile = () => {
     username: user.user.username,
     email: user.user.email,
     bio: user.user.bio,
-    profilePicture: user.user.profilePicture,
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.put(`api/user/update/${user.user._id}`, {
-        ...updateDetails,
-        profilePicture: imageUrl,
-      });
+      const res = await axios.put(
+        `api/user/update/${user.user._id}`,
+        {
+          ...updateDetails,
+          profilePicture: imageFile,
+        },
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
       if (res.data.success) {
         localStorage.setItem("thread-user", JSON.stringify(res.data));
         setUser(res.data);
@@ -52,7 +55,7 @@ const UpdateProfile = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} encType="multipart/form-data">
       <Flex align={"center"} justify={"center"} my={6}>
         <Stack
           spacing={4}
@@ -82,7 +85,7 @@ const UpdateProfile = () => {
                   size="xl"
                   boxShadow={"md"}
                   cursor={"pointer"}
-                  src={imageUrl || user.profilePicture}
+                  src={imageUrl || user.user.profilePicture}
                   onClick={() => fileRef.current.click()}
                 />
                 <Input
