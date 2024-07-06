@@ -142,7 +142,7 @@ export const getProfile = async (req, res) => {
         .json({ success: false, message: "User not found!" });
     }
 
-    res.status(200).json({ successs: true, message: user });
+    res.status(200).json({ success: true, message: user });
   } catch (error) {
     console.log(error.message);
     res
