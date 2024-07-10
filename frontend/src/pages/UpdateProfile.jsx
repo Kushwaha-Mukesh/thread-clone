@@ -23,6 +23,7 @@ const UpdateProfile = () => {
   const fileRef = useRef();
   const { handleImageChange, imageUrl, imageFile } = usePreviewImg();
   const showToast = useShowToast();
+  const [updating, setUpdating] = useState(false);
 
   const [updateDetails, setUpdateDetails] = useState({
     name: user.user.name,
@@ -33,6 +34,8 @@ const UpdateProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (updating) return;
+    setUpdating(true);
     try {
       const res = await axios.put(
         `api/user/update/${user.user._id}`,
@@ -51,6 +54,8 @@ const UpdateProfile = () => {
       }
     } catch (error) {
       showToast("Error", error.response.data.message, "error");
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -176,6 +181,7 @@ const UpdateProfile = () => {
                 bg: "green.500",
               }}
               type="submit"
+              isLoading={updating}
             >
               Submit
             </Button>
