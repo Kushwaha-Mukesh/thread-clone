@@ -1,4 +1,5 @@
 import Post from "../models/postModel.js";
+import { v2 as cloudinary } from "cloudinary";
 
 export const getAllPosts = async (req, res) => {
   try {
@@ -38,10 +39,19 @@ export const createPost = async (req, res) => {
       message: "Post text exceeded the limit of 500 characters",
     });
   }
+
   try {
+    let uploadRes;
+    if (req.files && req.files.postImg) {
+      uploadRes = await cloudinary.uploader.upload(
+        req.files.postImg.tempFilePath
+      );
+    }
+
     const post = await Post.create({
       postedBy: req.user._id,
       text: text,
+      ...(req.files && req.files.postImg && { image: uploadRes.secure_url }),
     });
 
     res.status(200).json({ success: true, message: post });

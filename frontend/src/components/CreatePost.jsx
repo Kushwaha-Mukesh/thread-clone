@@ -21,6 +21,8 @@ import {
 import { useRef, useState } from "react";
 import usePreviewImg from "../hooks/usePreviewImg";
 import { BsImageFill } from "react-icons/bs";
+import axios from "axios";
+import useShowToast from "../hooks/useShowToast";
 
 const CreatePost = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -29,6 +31,8 @@ const CreatePost = () => {
   const { handleImageChange, imageUrl, imageFile, setImageUrl, setImageFile } =
     usePreviewImg();
   const imageRef = useRef();
+  const showToast = useShowToast();
+  const [loading, setLoading] = useState(false);
 
   const handleCreatePostChange = (e) => {
     const inputText = e.target.value;
@@ -42,7 +46,25 @@ const CreatePost = () => {
     }
   };
 
-  const handleCreatePost = () => {};
+  const handleCreatePost = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        "/api/post/create",
+        { text: postText, postImg: imageFile },
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      if (res.data.success) {
+        showToast("Success", "Post created successfully", "success");
+      }
+      console.log(res);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+      showToast("Error", "Error creating post", "error");
+    }
+  };
 
   return (
     <>
@@ -73,7 +95,7 @@ const CreatePost = () => {
                 fontWeight={"bold"}
                 textAlign={"right"}
                 m={"1"}
-                color={"gray.800"}
+                color={"gray.900"}
               >
                 {remainingText}/500
               </Text>
@@ -108,7 +130,12 @@ const CreatePost = () => {
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleCreatePost}>
+            <Button
+              colorScheme="blue"
+              mr={3}
+              onClick={handleCreatePost}
+              isLoading={loading}
+            >
               Post
             </Button>
           </ModalFooter>
