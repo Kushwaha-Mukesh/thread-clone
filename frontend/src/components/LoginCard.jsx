@@ -23,6 +23,7 @@ import useShowToast from "../hooks/useShowToast";
 import axios from "axios";
 
 const LoginCard = () => {
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginDetails, setLoginDetails] = useState({
     username: "",
@@ -35,16 +36,20 @@ const LoginCard = () => {
 
   const handleLogin = async () => {
     try {
+      setLoading(true);
       const res = await axios.post("/api/user/signin", loginDetails);
       if (res.data.success) {
         localStorage.setItem("thread-user", JSON.stringify(res.data));
         setUser(res.data);
         showToast("Success", res.data.message, "success");
+        setLoading(false);
       } else {
         showToast("Error", res.data.message, "error");
+        setLoading(false);
       }
     } catch (error) {
       showToast("Error", error.response.data.message, "error");
+      setLoading(false);
     }
   };
 
@@ -101,7 +106,8 @@ const LoginCard = () => {
             </FormControl>
             <Stack spacing={10} pt={2}>
               <Button
-                loadingText="Submitting"
+                isLoading={loading}
+                loadingText="logging..."
                 size="lg"
                 bg={useColorModeValue("gray.600", "gray.700")}
                 color={"white"}

@@ -57,11 +57,13 @@ const CreatePost = () => {
       if (res.data.success) {
         showToast("Success", "Post created successfully", "success");
       }
-      console.log(res);
       setLoading(false);
+      onClose();
+      setPostText("");
+      setImageUrl("");
+      setImageFile(null);
     } catch (error) {
       setLoading(false);
-      console.log(error);
       showToast("Error", "Error creating post", "error");
     }
   };

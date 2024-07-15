@@ -23,6 +23,7 @@ import useShowToast from "../hooks/useShowToast";
 import userAtom from "../atoms/userAtom";
 
 const SignupCard = () => {
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const setAuthScreen = useSetRecoilState(authScreenAtom);
   const [signUpDetails, setSignUpDetails] = useState({
@@ -37,16 +38,20 @@ const SignupCard = () => {
 
   const handleSignup = async () => {
     try {
+      setLoading(true);
       const res = await axios.post("/api/user/signup", signUpDetails);
       if (res.data.success) {
         localStorage.setItem("thread-user", JSON.stringify(res.data));
         setUser(res.data);
         showToast("Success", res.data.message, "success");
+        setLoading(false);
       } else {
         showToast("Error", res.data.message, "error");
+        setLoading(false);
       }
     } catch (error) {
       showToast("Error", error.response.data.message, "error");
+      setLoading(false);
     }
   };
 
@@ -137,6 +142,7 @@ const SignupCard = () => {
             </FormControl>
             <Stack spacing={10} pt={2}>
               <Button
+                isLoading={loading}
                 loadingText="Submitting"
                 size="lg"
                 bg={useColorModeValue("gray.600", "gray.700")}
