@@ -62,6 +62,7 @@ const CreatePost = () => {
       setPostText("");
       setImageUrl("");
       setImageFile(null);
+      setRemainingText(500);
     } catch (error) {
       setLoading(false);
       showToast("Error", "Error creating post", "error");
