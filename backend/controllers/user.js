@@ -2,6 +2,7 @@ import User from "../models/userModel.js";
 import bcryptjs from "bcryptjs";
 import generateTokenAndCookie from "../utils/generateTokenAndCookie.js";
 import { v2 as cloudinary } from "cloudinary";
+import mongoose from "mongoose";
 
 export const signUp = async (req, res) => {
   const { username, name, email, password } = req.body;
@@ -125,16 +126,23 @@ export const followUnfollow = async (req, res) => {
 };
 
 export const getProfile = async (req, res) => {
-  const { username } = req.params;
-  if (!username) {
+  const { query } = req.params;
+  if (!query) {
     return res
       .status(400)
       .json({ success: false, message: "Invalid Request!" });
   }
   try {
-    const user = await User.findOne({ username })
-      .select("-password")
-      .select("-updatedAt");
+    let user;
+    if (mongoose.Types.ObjectId.isValid(query)) {
+      user = await User.findOne({ _id: query })
+        .select("-password")
+        .select("-updatedAt");
+    } else {
+      user = await User.findOne({ username: query })
+        .select("-password")
+        .select("-updatedAt");
+    }
 
     if (!user) {
       return res
