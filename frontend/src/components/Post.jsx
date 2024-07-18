@@ -1,14 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Avatar, Box, Flex, Image, Text } from "@chakra-ui/react";
-import { BsThreeDots } from "react-icons/bs";
 import Actions from "./Actions";
 import { useEffect, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 import axios from "axios";
+import { formatDistanceToNow } from "date-fns";
+
 const Post = ({ post, postedBy }) => {
   const [liked, setLiked] = useState(false);
   const showToast = useShowToast();
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getUser = async () => {
@@ -25,58 +27,82 @@ const Post = ({ post, postedBy }) => {
   }, [postedBy]);
 
   return (
-    <Link to={"/mark/post/1"}>
+    <Link to={`/${user && user.username}/post/${post._id}`}>
       <Flex gap={3} mb={4} py={5}>
         <Flex flexDirection={"column"} alignItems={"center"}>
           <Avatar
             size={"md"}
             name={user && user.name}
             src={user && user.profilePicture}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate(`/${user && user.username}`);
+            }}
           />
           <Box w={"1px"} h={"full"} bg={"gray.light"} my={2}></Box>
           <Box position={"relative"} w={"full"}>
-            <Avatar
-              size={"sm"}
-              name="mukesh"
-              src="https://bit.ly/dan-abramov"
-              position={"absolute"}
-              top={"-12px"}
-              left={"12px"}
-              padding={2}
-            />
-            <Avatar
-              size={"sm"}
-              name="mukesh"
-              src="https://bit.ly/sage-adebayo"
-              position={"absolute"}
-              bottom={0}
-              right={"-5px"}
-              padding={2}
-            />
-            <Avatar
-              size={"sm"}
-              name="mukesh"
-              src="https://bit.ly/prosper-baba"
-              position={"absolute"}
-              bottom={0}
-              left={"6px"}
-              padding={2}
-            />
+            {post.replies.length === 0 && <Text textAlign={"center"}>🥱</Text>}
+            {post.replies[0] && (
+              <Avatar
+                size={"sm"}
+                name={post.replies[0].username}
+                src={post.replies[0].userProfilePicture}
+                position={"absolute"}
+                top={"-12px"}
+                left={"12px"}
+                padding={2}
+              />
+            )}
+
+            {post.replies[1] && (
+              <Avatar
+                size={"sm"}
+                name={post.replies[1].username}
+                src={post.replies[1].userProfilePicture}
+                position={"absolute"}
+                bottom={0}
+                right={"-5px"}
+                padding={2}
+              />
+            )}
+
+            {post.replies[2] && (
+              <Avatar
+                size={"sm"}
+                name={post.replies[2].username}
+                src={post.replies[2].userProfilePicture}
+                position={"absolute"}
+                bottom={0}
+                left={"6px"}
+                padding={2}
+              />
+            )}
           </Box>
         </Flex>
         <Flex flex={1} flexDirection={"column"} gap={2}>
           <Flex justifyContent={"space-between"} w={"full"}>
             <Flex w={"full"} alignItems={"center"}>
-              <Text fontSize={"sm"} fontWeight={"bold"}>
+              <Text
+                fontSize={"sm"}
+                fontWeight={"bold"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(`/${user && user.username}`);
+                }}
+              >
                 {user && user.username}
               </Text>
               <Image src="/verified.png" w={4} h={4} ml={1} />
             </Flex>
             <Flex gap={4} alignItems={"center"}>
-              <Text fontSize={"sm"} color={"gray.light"}>
-                1d
+              <Text
+                fontSize={"xs"}
+                width={36}
+                textAlign={"right"}
+                color={"gray.light"}
+              >
+                {formatDistanceToNow(new Date(post.createdAt))} ago
               </Text>
-              <BsThreeDots />
             </Flex>
           </Flex>
           <Text fontSize={"sm"}>{post.text}</Text>
