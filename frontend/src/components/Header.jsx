@@ -9,7 +9,11 @@ const Header = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const user = useRecoilValue(userAtom);
   return (
-    <Flex justifyContent={"space-between"} mt={6} mb={12}>
+    <Flex
+      justifyContent={`${user ? "space-between" : "center"}`}
+      mt={6}
+      mb={12}
+    >
       {user && (
         <RouterLink to="/">
           <AiFillHome size={24} />

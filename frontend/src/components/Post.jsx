@@ -7,7 +7,6 @@ import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
 
 const Post = ({ post, postedBy }) => {
-  const [liked, setLiked] = useState(false);
   const showToast = useShowToast();
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
@@ -116,16 +115,7 @@ const Post = ({ post, postedBy }) => {
               <Image src={post.image} w={"full"} />
             </Box>
           )}
-          <Actions liked={liked} setLiked={setLiked} />
-          <Flex gap={2} alignItems={"center"}>
-            <Text color={"gray.light"} fontSize={"sm"}>
-              {post.replies.length} Replies
-            </Text>
-            <Box w={1} h={1} borderRadius={"full"} bg={"gray.light"}></Box>
-            <Text color={"gray.light"} fontSize={"sm"}>
-              {post.likes.length} Likes
-            </Text>
-          </Flex>
+          <Actions post={post} />
         </Flex>
       </Flex>
     </Link>
