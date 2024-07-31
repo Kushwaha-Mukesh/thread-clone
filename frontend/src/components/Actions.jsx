@@ -1,4 +1,19 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { GoHeart, GoHeartFill } from "react-icons/go";
 import { FaComment } from "react-icons/fa";
 import { FaRepeat } from "react-icons/fa6";
@@ -12,11 +27,15 @@ import axios from "axios";
 const Actions = ({ post: post_ }) => {
   const user = useRecoilValue(userAtom);
   const [post, setPost] = useState(post_);
+  const [isLiking, setIsLiking] = useState(false);
+  const [reply, setReply] = useState("");
+
   const [liked, setLiked] = useState(
     post_ && post_.likes.includes(user && user.user._id)
   );
+
   const showToast = useShowToast();
-  const [isLiking, setIsLiking] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const handleLikeAndUnlike = async () => {
     if (!user)
@@ -45,6 +64,28 @@ const Actions = ({ post: post_ }) => {
     }
   };
 
+  const handleReply = async () => {
+    if (!user)
+      return showToast(
+        "Error",
+        "You must be logged in to Like and Unlike a post",
+        "error"
+      );
+    try {
+      const res = await axios.post(`/api/post/reply/${post._id}`, {
+        text: reply,
+      });
+      if (res.data.success) {
+        setPost(res.data.message);
+        showToast("Success", "Reply added successfully", "success");
+        setReply("");
+        onClose();
+      }
+    } catch (error) {
+      showToast("Error", "error adding reply", "error");
+    }
+  };
+
   return (
     <Flex flexDirection={"column"}>
       <Flex
@@ -58,7 +99,7 @@ const Actions = ({ post: post_ }) => {
         ) : (
           <GoHeart onClick={handleLikeAndUnlike} />
         )}
-        <FaComment />
+        <FaComment onClick={onOpen} />
         <FaRepeat />
         <FiSend />
       </Flex>
@@ -71,6 +112,28 @@ const Actions = ({ post: post_ }) => {
           {post && post.likes.length} Likes
         </Text>
       </Flex>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Post Your Reply</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <FormControl>
+              <Input
+                placeholder="Reply on the post"
+                value={reply}
+                onChange={(e) => setReply(e.target.value)}
+              />
+            </FormControl>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" size={"sm"} mr={3} onClick={handleReply}>
+              Reply
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Flex>
   );
 };
