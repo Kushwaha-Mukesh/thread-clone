@@ -1,5 +1,6 @@
 import Post from "../models/postModel.js";
 import { v2 as cloudinary } from "cloudinary";
+import User from "../models/userModel.js";
 
 export const getAllPosts = async (req, res) => {
   try {
@@ -25,6 +26,33 @@ export const getOnePosts = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const getUserPosts = async (req, res) => {
+  const { username } = req.params;
+  if (!username) {
+    return res
+      .status(401)
+      .json({ success: false, message: "Invalid Request." });
+  }
+  try {
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid Request." });
+    }
+    const posts = await Post.find({ postedBy: user._id }).sort({
+      createdAt: -1,
+    });
+    res.status(200).json({ success: true, message: posts });
+  } catch (error) {
+    console.log(error.message);
+    res
+      .status(500)
+      .json({ success: false, message: "Error getting user posts" });
+  }
+};
+
 export const createPost = async (req, res) => {
   const { text } = req.body;
   if (!text) {

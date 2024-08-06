@@ -5,14 +5,18 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import useShowToast from "../hooks/useShowToast.js";
 import { Flex, Spinner } from "@chakra-ui/react";
+import Post from "../components/Post.jsx";
 
 const UserPage = () => {
   const [user, setUser] = useState(null);
+  const [posts, setPosts] = useState([]);
   const { username } = useParams();
   const showToast = useShowToast();
   const [loading, setLoading] = useState(true);
+  const [postLoading, setPostLoading] = useState(true);
   useEffect(() => {
     const getUser = async () => {
+      setLoading(true);
       try {
         const res = await axios.get(`/api/user/profile/${username}`);
         if (res.data.success) {
@@ -27,7 +31,24 @@ const UserPage = () => {
       }
     };
 
+    const getPosts = async () => {
+      setPostLoading(true);
+      try {
+        const res = await axios.get(`/api/post/user/${username}`);
+        if (res.data.success) {
+          setPosts(res.data.message);
+        } else {
+          showToast("Error", "error getting posts", "error");
+        }
+      } catch (error) {
+        showToast("Error", error.response.data.message, "error");
+      } finally {
+        setPostLoading(false);
+      }
+    };
+
     getUser();
+    getPosts();
   }, [username]);
 
   if (!user && loading) {
@@ -42,9 +63,16 @@ const UserPage = () => {
   return (
     <>
       <UserHeader user={user} />
-      <UserPost likes={401} replies={50} postImage={"/post1.png"} />
-      <UserPost likes={32} replies={10} postImage={"/post2.png"} />
-      <UserPost likes={921} replies={368} postImage={"/post3.png"} />
+      {!postLoading && posts.length === 0 && <h1>No Posts to show!😑</h1>}
+      {postLoading && (
+        <Flex justifyContent={"center"} my={12}>
+          <Spinner size="xl" />
+        </Flex>
+      )}
+
+      {posts.map((post) => (
+        <Post key={post._id} post={post} postedBy={post.postedBy} />
+      ))}
     </>
   );
 };

@@ -5,6 +5,7 @@ import {
   deletePost,
   getAllPosts,
   getOnePosts,
+  getUserPosts,
   likePost,
   postFeed,
   replyPost,
@@ -14,6 +15,7 @@ const router = express.Router();
 
 router.get("/", getAllPosts);
 router.get("/:postId", getOnePosts);
+router.get("/user/:username", getUserPosts);
 router.post("/create", isLoggedIn, createPost);
 router.delete("/delete/:postId", isLoggedIn, deletePost);
 router.get("/likePost/:postId", isLoggedIn, likePost);
