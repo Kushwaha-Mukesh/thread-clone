@@ -100,10 +100,14 @@ export const deletePost = async (req, res) => {
         .status(401)
         .json({ success: false, message: "Unauthorized to delete post" });
     }
+    if (post.image) {
+      const imgId = post.image.split("/").pop().split(".")[0];
+      await cloudinary.uploader.destroy(imgId);
+    }
     await Post.findByIdAndDelete(postId);
     res
       .status(200)
-      .json({ success: false, message: "Post deleted Successfully" });
+      .json({ success: true, message: "Post deleted Successfully" });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ success: false, message: error.message });

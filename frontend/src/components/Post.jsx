@@ -1,15 +1,32 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Avatar, Box, Flex, Image, Text } from "@chakra-ui/react";
+import {
+  Avatar,
+  Box,
+  Flex,
+  Image,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Portal,
+  Text,
+} from "@chakra-ui/react";
 import Actions from "./Actions";
 import { useEffect, useState } from "react";
 import useShowToast from "../hooks/useShowToast";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
+import { useRecoilValue } from "recoil";
+import userAtom from "../atoms/userAtom";
+import { MdDelete } from "react-icons/md";
+import { BsThreeDots } from "react-icons/bs";
+import { CiEdit } from "react-icons/ci";
 
-const Post = ({ post, postedBy }) => {
+const Post = ({ post, postedBy, handleDeletePost }) => {
   const showToast = useShowToast();
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const currentUser = useRecoilValue(userAtom);
 
   useEffect(() => {
     const getUser = async () => {
@@ -26,7 +43,7 @@ const Post = ({ post, postedBy }) => {
   }, [postedBy]);
 
   return (
-    <Link to={`/${user && user.username}/post/${post._id}`}>
+    <>
       <Flex gap={3} mb={4} py={5}>
         <Flex flexDirection={"column"} alignItems={"center"}>
           <Avatar
@@ -102,23 +119,55 @@ const Post = ({ post, postedBy }) => {
               >
                 {formatDistanceToNow(new Date(post.createdAt))} ago
               </Text>
+              {currentUser?.user._id === user?._id && (
+                <Menu>
+                  <MenuButton>
+                    <BsThreeDots size={18} cursor={"pointer"} />
+                  </MenuButton>
+                  <Portal>
+                    <MenuList bg={"gray.dark"}>
+                      <MenuItem
+                        bg={"gray.dark"}
+                        display={"flex"}
+                        gap={2}
+                        onClick={() => handleDeletePost(post._id)}
+                      >
+                        <MdDelete color="red" size={18} />
+                        Delete
+                      </MenuItem>
+                      <MenuItem
+                        bg={"gray.dark"}
+                        display={"flex"}
+                        gap={2}
+                        onClick={() => handleDeletePost(post._id)}
+                      >
+                        <CiEdit color="blue" size={18} />
+                        Edit
+                      </MenuItem>
+                    </MenuList>
+                  </Portal>
+                </Menu>
+              )}
             </Flex>
           </Flex>
-          <Text fontSize={"sm"}>{post.text}</Text>
-          {post.image && (
-            <Box
-              borderRadius={6}
-              overflow={"hidden"}
-              border={"1px solid"}
-              borderColor={"gray.light"}
-            >
-              <Image src={post.image} w={"full"} />
-            </Box>
-          )}
+          <Link to={`/${user && user.username}/post/${post._id}`}>
+            <Text fontSize={"sm"}>{post.text}</Text>
+            {post.image && (
+              <Box
+                borderRadius={6}
+                overflow={"hidden"}
+                border={"1px solid"}
+                borderColor={"gray.light"}
+                mt={4}
+              >
+                <Image src={post.image} w={"full"} />
+              </Box>
+            )}
+          </Link>
           <Actions post={post} />
         </Flex>
       </Flex>
-    </Link>
+    </>
   );
 };
 

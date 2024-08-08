@@ -14,6 +14,7 @@ const UserPage = () => {
   const showToast = useShowToast();
   const [loading, setLoading] = useState(true);
   const [postLoading, setPostLoading] = useState(true);
+
   useEffect(() => {
     const getUser = async () => {
       setLoading(true);
@@ -60,6 +61,20 @@ const UserPage = () => {
   }
   if (!user && !loading) return <h1>User Not Found !</h1>;
 
+  const handleDeletePost = async (id) => {
+    try {
+      const res = await axios.delete(`/api/post/delete/${id}`);
+      if (res.data.success) {
+        setPosts((prevPosts) =>
+          prevPosts.filter((prevPost) => prevPost._id !== id)
+        );
+        showToast("Success", res.data.message, "success");
+      }
+    } catch (error) {
+      showToast("Error", "error deleting post", "error");
+    }
+  };
+
   return (
     <>
       <UserHeader user={user} />
@@ -71,7 +86,12 @@ const UserPage = () => {
       )}
 
       {posts.map((post) => (
-        <Post key={post._id} post={post} postedBy={post.postedBy} />
+        <Post
+          key={post._id}
+          post={post}
+          postedBy={post.postedBy}
+          handleDeletePost={handleDeletePost}
+        />
       ))}
     </>
   );
